@@ -1,0 +1,17 @@
+{
+  "source": "https://olvz.ch/files/dokumente/2026/JOM%202026.pdf",
+  "retrieved": "2026-08-30",
+  "events": [
+    { "uid": "13263", "date": "2026-01-11", "name": "Winter Stadt OL" },
+    { "uid": "13326", "date": "2026-03-01", "name": "Zürcher Einzel OL" },
+    { "uid": "13331", "date": "2026-03-07", "name": "Säuliämtler OL" },
+    { "uid": "13318", "date": "2026-03-15", "name": "Welsiker OL" },
+    { "uid": "13251", "date": "2026-03-22", "name": "Schaffhauser OL" },
+    { "uid": "13011", "date": "2026-05-17", "name": "Galgener OL" },
+    { "uid": "13363", "date": "2026-05-31", "name": "Zimmerberg OL/1" },
+    { "uid": "13367", "date": "2026-06-07", "name": "Wisliger OL" },
+    { "uid": "13293", "date": "2026-09-19", "name": "Zimmerberg OL/2" },
+    { "uid": "13364", "date": "2026-09-26", "name": "Rafzerfelder OL" },
+    { "uid": "13378", "date": "2026-10-25", "name": "JOM-Schlusslauf" }
+  ]
+}

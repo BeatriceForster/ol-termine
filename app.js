@@ -1,6 +1,52 @@
 const TERRAIN_ICON = { wald: "🌲", stadt: "🏠", mix: "🏡", unbekannt: "⋯" };
 
+const SM_CODES = new Set(["LOM", "MOM", "SPM", "NOM", "SOM", "TOM", "SSM"]);
+const TYPE_LABEL = {
+  sm: "SM",
+  nat: "Nat. OL",
+  swisscup: "SwissCup",
+  reg: "Reg. OL",
+  mehrtaegig: "Mehrtägig",
+  staffel: "Staffel",
+  team: "Team-OL",
+  adm: "Adm",
+  sonstige: "Sonstige",
+};
+
+function categorize(code) {
+  if (!code) return "sonstige";
+  if (code === "Adm") return "adm";
+  if (SM_CODES.has(code)) return "sm";
+  if (code.startsWith("**")) return "nat";
+  if (/^SC\d/.test(code)) return "swisscup";
+  if (code.startsWith("*")) return "reg";
+  if (/M$/.test(code)) return "mehrtaegig";
+  if (/S$/.test(code)) return "staffel";
+  if (/T$/.test(code)) return "team";
+  return "sonstige";
+}
+
+function isJomEvent(ev) {
+  return jomUids.has(ev.uid);
+}
+
 let events = [];
+let jomOnly = false;
+let jomUids = new Set();
+
+async function loadJomConfig(year) {
+  try {
+    const res = await fetch(`/jom-${year}.json`, { cache: "no-store" });
+    if (!res.ok) {
+      jomUids = new Set();
+      return;
+    }
+    const data = await res.json();
+    jomUids = new Set((data.events || []).map((e) => e.uid));
+  } catch {
+    jomUids = new Set();
+  }
+}
 
 const yearSelect = document.getElementById("year");
 const reloadBtn = document.getElementById("reload");
@@ -11,6 +57,8 @@ const mapFrame = document.getElementById("map-frame");
 const mapTitle = document.getElementById("map-title");
 const mapHint = document.getElementById("map-hint");
 const terrainFilters = Array.from(document.querySelectorAll(".terrain-filter"));
+const typeFilters = Array.from(document.querySelectorAll(".type-filter"));
+const jomBtn = document.getElementById("jom-btn");
 
 function initYearSelect() {
   const current = new Date().getFullYear();
@@ -33,7 +81,10 @@ async function loadFixtures() {
   reloadBtn.disabled = true;
   setStatus(`Lade Termine ${year} von o-l.ch ...`);
   try {
-    const res = await fetch(`/api/fixtures?year=${encodeURIComponent(year)}`);
+    const [res] = await Promise.all([
+      fetch(`/api/fixtures?year=${encodeURIComponent(year)}`),
+      loadJomConfig(year),
+    ]);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
     events = data.events;
@@ -50,6 +101,23 @@ function activeTerrains() {
   return new Set(terrainFilters.filter((cb) => cb.checked).map((cb) => cb.value));
 }
 
+function activeTypes() {
+  return new Set(typeFilters.filter((cb) => cb.checked).map((cb) => cb.value));
+}
+
+function toggleJom() {
+  if (!jomOnly && jomUids.size === 0) {
+    setStatus(`Keine JOM-Konfiguration für ${yearSelect.value} gefunden (jom-${yearSelect.value}.json fehlt).`, true);
+    return;
+  }
+  jomOnly = !jomOnly;
+  jomBtn.classList.toggle("active", jomOnly);
+  jomBtn.textContent = jomOnly ? "JOM-Filter aktiv ✕" : "Nur JOM-Läufe";
+  terrainFilters.concat(typeFilters).forEach((cb) => (cb.disabled = jomOnly));
+  searchEl.disabled = jomOnly;
+  render();
+}
+
 function formatDate(iso) {
   const [y, m, d] = iso.split("-");
   return `${d}.${m}.${y}`;
@@ -62,16 +130,24 @@ function matchesSearch(ev, query) {
 }
 
 function render() {
-  const terrains = activeTerrains();
-  const query = searchEl.value.trim().toLowerCase();
-  const filtered = events.filter((ev) => terrains.has(ev.terrain) && matchesSearch(ev, query));
+  let filtered;
+  if (jomOnly) {
+    filtered = events.filter(isJomEvent);
+  } else {
+    const terrains = activeTerrains();
+    const types = activeTypes();
+    const query = searchEl.value.trim().toLowerCase();
+    filtered = events.filter(
+      (ev) => terrains.has(ev.terrain) && types.has(categorize(ev.code)) && matchesSearch(ev, query)
+    );
+  }
 
   bodyEl.innerHTML = "";
 
   if (filtered.length === 0) {
     const tr = document.createElement("tr");
     const td = document.createElement("td");
-    td.colSpan = 9;
+    td.colSpan = 10;
     td.className = "empty";
     td.textContent = events.length === 0
       ? 'Noch keine Daten geladen. "Daten laden" klicken.'
@@ -126,6 +202,12 @@ function buildRow(ev) {
   terrain.textContent = TERRAIN_ICON[ev.terrain] || "";
   terrain.title = ev.terrain;
   tr.appendChild(terrain);
+
+  const type = document.createElement("td");
+  const typeKey = categorize(ev.code);
+  type.textContent = TYPE_LABEL[typeKey] === "Sonstige" ? "" : TYPE_LABEL[typeKey];
+  type.title = ev.code;
+  tr.appendChild(type);
 
   const mapCell = document.createElement("td");
   if (ev.lat != null && ev.lon != null) {
@@ -227,3 +309,5 @@ initYearSelect();
 reloadBtn.addEventListener("click", loadFixtures);
 searchEl.addEventListener("input", render);
 terrainFilters.forEach((cb) => cb.addEventListener("change", render));
+typeFilters.forEach((cb) => cb.addEventListener("change", render));
+jomBtn.addEventListener("click", toggleJom);

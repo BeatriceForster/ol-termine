@@ -14,13 +14,31 @@
     </label>
     <button id="reload">⟳ Daten laden</button>
     <span id="status"></span>
-  </div>
-  <div class="filters">
-    <label><input type="checkbox" class="terrain-filter" value="wald" checked> 🌲 Wald</label>
-    <label><input type="checkbox" class="terrain-filter" value="stadt" checked> 🏠 Stadt</label>
-    <label><input type="checkbox" class="terrain-filter" value="mix" checked> 🏡 Mix</label>
-    <label><input type="checkbox" class="terrain-filter" value="unbekannt" checked> ⋯ ohne Angabe</label>
     <input type="search" id="search" placeholder="Suche nach Name, Veranstalter, Ort...">
+  </div>
+  <div class="filters-row">
+    <fieldset class="filter-box">
+      <legend>Gebiet</legend>
+      <label><input type="checkbox" class="terrain-filter" value="wald" checked> 🌲 Wald</label>
+      <label><input type="checkbox" class="terrain-filter" value="stadt" checked> 🏠 Stadt</label>
+      <label><input type="checkbox" class="terrain-filter" value="mix" checked> 🏡 Mix</label>
+      <label><input type="checkbox" class="terrain-filter" value="unbekannt" checked> ⋯ ohne Angabe</label>
+    </fieldset>
+    <button id="jom-btn" type="button">Nur JOM-Läufe</button>
+  </div>
+  <div class="filters-row">
+    <fieldset class="filter-box">
+      <legend>Typ</legend>
+      <label><input type="checkbox" class="type-filter" value="sm" checked> SM</label>
+      <label><input type="checkbox" class="type-filter" value="nat" checked> Nat. OL</label>
+      <label><input type="checkbox" class="type-filter" value="swisscup" checked> SwissCup</label>
+      <label><input type="checkbox" class="type-filter" value="reg" checked> Reg. OL</label>
+      <label><input type="checkbox" class="type-filter" value="mehrtaegig" checked> Mehrtägig</label>
+      <label><input type="checkbox" class="type-filter" value="staffel" checked> Staffel</label>
+      <label><input type="checkbox" class="type-filter" value="team" checked> Team-OL</label>
+      <label><input type="checkbox" class="type-filter" value="adm" checked> Adm</label>
+      <label><input type="checkbox" class="type-filter" value="sonstige" checked> Sonstige</label>
+    </fieldset>
   </div>
 </header>
 
@@ -36,12 +54,13 @@
           <th>Gebiet</th>
           <th>D</th>
           <th>T</th>
+          <th>Typ</th>
           <th>Karte</th>
           <th>ICS</th>
         </tr>
       </thead>
       <tbody id="events-body">
-        <tr><td colspan="9" class="empty">Noch keine Daten geladen. "Daten laden" klicken.</td></tr>
+        <tr><td colspan="10" class="empty">Noch keine Daten geladen. "Daten laden" klicken.</td></tr>
       </tbody>
     </table>
   </section>

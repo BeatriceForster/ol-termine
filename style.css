@@ -26,13 +26,46 @@ header {
 
 h1 { font-size: 1.3em; margin: 0 0 8px; }
 
-.controls, .filters {
+.controls, .filters-row {
   display: flex;
   align-items: center;
-  gap: 14px;
+  gap: 10px 14px;
   flex-wrap: wrap;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
   font-size: 0.9em;
+}
+
+.filter-box {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px 12px;
+  flex-wrap: wrap;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 4px 10px;
+  flex: 0 1 auto;
+}
+
+.filter-box legend {
+  font-size: 0.85em;
+  font-weight: bold;
+  padding: 0 4px;
+}
+
+.filter-box label {
+  white-space: nowrap;
+  font-weight: normal;
+}
+
+#jom-btn {
+  flex-shrink: 0;
+  background: canvas;
+  color: var(--accent);
+}
+#jom-btn.active {
+  background: var(--accent);
+  color: #fff;
 }
 
 button {
@@ -53,8 +86,8 @@ button.small {
 }
 
 #search {
-  flex: 1;
-  min-width: 180px;
+  margin-left: auto;
+  min-width: 220px;
   padding: 5px 8px;
   border: 1px solid var(--border);
   border-radius: 4px;
@@ -80,7 +113,7 @@ main {
 
 #map-panel {
   position: sticky;
-  top: 130px;
+  top: 100px;
   width: 380px;
   flex-shrink: 0;
 }
