@@ -58,12 +58,28 @@ h1 { font-size: 1.3em; margin: 0 0 8px; }
   font-weight: normal;
 }
 
-#jom-btn {
+.radius-control {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+
+.radius-control input {
+  width: 55px;
+  padding: 4px 6px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: canvas;
+  color: canvastext;
+}
+
+.toggle-btn {
   flex-shrink: 0;
   background: canvas;
   color: var(--accent);
 }
-#jom-btn.active {
+.toggle-btn.active {
   background: var(--accent);
   color: #fff;
 }

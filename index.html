@@ -24,7 +24,11 @@
       <label><input type="checkbox" class="terrain-filter" value="mix" checked> 🏡 Mix</label>
       <label><input type="checkbox" class="terrain-filter" value="unbekannt" checked> ⋯ ohne Angabe</label>
     </fieldset>
-    <button id="jom-btn" type="button">Nur JOM-Läufe</button>
+    <button id="jom-btn" class="toggle-btn" type="button">Nur JOM-Läufe</button>
+    <span class="radius-control">
+      <input type="number" id="nearby-radius" min="1" max="500" step="5" value="50"> km
+    </span>
+    <button id="nearby-btn" class="toggle-btn" type="button">OL in der Nähe</button>
   </div>
   <div class="filters-row">
     <fieldset class="filter-box">

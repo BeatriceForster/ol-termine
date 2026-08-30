@@ -30,8 +30,29 @@ function isJomEvent(ev) {
   return jomUids.has(ev.uid);
 }
 
+const HOME = { lat: 47.3546, lon: 8.4332 }; // Birmensdorf ZH
+
+function haversineKm(lat1, lon1, lat2, lon2) {
+  const R = 6371;
+  const dLat = ((lat2 - lat1) * Math.PI) / 180;
+  const dLon = ((lon2 - lon1) * Math.PI) / 180;
+  const a =
+    Math.sin(dLat / 2) ** 2 +
+    Math.cos((lat1 * Math.PI) / 180) * Math.cos((lat2 * Math.PI) / 180) * Math.sin(dLon / 2) ** 2;
+  return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+}
+
+function getNearbyRadius() {
+  const val = parseFloat(nearbyRadiusInput.value);
+  return val > 0 ? val : 50;
+}
+
+function isNearbyEvent(ev) {
+  return ev.lat != null && ev.lon != null && haversineKm(HOME.lat, HOME.lon, ev.lat, ev.lon) <= getNearbyRadius();
+}
+
 let events = [];
-let jomOnly = false;
+let specialFilter = null; // null | "jom" | "nearby"
 let jomUids = new Set();
 
 async function loadJomConfig(year) {
@@ -59,6 +80,8 @@ const mapHint = document.getElementById("map-hint");
 const terrainFilters = Array.from(document.querySelectorAll(".terrain-filter"));
 const typeFilters = Array.from(document.querySelectorAll(".type-filter"));
 const jomBtn = document.getElementById("jom-btn");
+const nearbyBtn = document.getElementById("nearby-btn");
+const nearbyRadiusInput = document.getElementById("nearby-radius");
 
 function initYearSelect() {
   const current = new Date().getFullYear();
@@ -105,16 +128,22 @@ function activeTypes() {
   return new Set(typeFilters.filter((cb) => cb.checked).map((cb) => cb.value));
 }
 
-function toggleJom() {
-  if (!jomOnly && jomUids.size === 0) {
+function setSpecialFilter(key) {
+  if (key === "jom" && specialFilter !== "jom" && jomUids.size === 0) {
     setStatus(`Keine JOM-Konfiguration für ${yearSelect.value} gefunden (jom-${yearSelect.value}.json fehlt).`, true);
     return;
   }
-  jomOnly = !jomOnly;
-  jomBtn.classList.toggle("active", jomOnly);
-  jomBtn.textContent = jomOnly ? "JOM-Filter aktiv ✕" : "Nur JOM-Läufe";
-  terrainFilters.concat(typeFilters).forEach((cb) => (cb.disabled = jomOnly));
-  searchEl.disabled = jomOnly;
+  specialFilter = specialFilter === key ? null : key;
+
+  jomBtn.classList.toggle("active", specialFilter === "jom");
+  jomBtn.textContent = specialFilter === "jom" ? "JOM-Filter aktiv ✕" : "Nur JOM-Läufe";
+
+  nearbyBtn.classList.toggle("active", specialFilter === "nearby");
+  nearbyBtn.textContent = specialFilter === "nearby" ? "Nähe-Filter aktiv ✕" : "OL in der Nähe";
+
+  const disable = specialFilter !== null;
+  terrainFilters.concat(typeFilters).forEach((cb) => (cb.disabled = disable));
+  searchEl.disabled = disable;
   render();
 }
 
@@ -131,8 +160,10 @@ function matchesSearch(ev, query) {
 
 function render() {
   let filtered;
-  if (jomOnly) {
+  if (specialFilter === "jom") {
     filtered = events.filter(isJomEvent);
+  } else if (specialFilter === "nearby") {
+    filtered = events.filter(isNearbyEvent);
   } else {
     const terrains = activeTerrains();
     const types = activeTypes();
@@ -310,4 +341,8 @@ reloadBtn.addEventListener("click", loadFixtures);
 searchEl.addEventListener("input", render);
 terrainFilters.forEach((cb) => cb.addEventListener("change", render));
 typeFilters.forEach((cb) => cb.addEventListener("change", render));
-jomBtn.addEventListener("click", toggleJom);
+jomBtn.addEventListener("click", () => setSpecialFilter("jom"));
+nearbyBtn.addEventListener("click", () => setSpecialFilter("nearby"));
+nearbyRadiusInput.addEventListener("input", () => {
+  if (specialFilter === "nearby") render();
+});
