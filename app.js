@@ -52,7 +52,8 @@ function isNearbyEvent(ev) {
 }
 
 let events = [];
-let specialFilter = null; // null | "jom" | "nearby"
+let jomActive = false;
+let nearbyActive = false;
 let jomUids = new Set();
 
 async function loadJomConfig(year) {
@@ -128,22 +129,21 @@ function activeTypes() {
   return new Set(typeFilters.filter((cb) => cb.checked).map((cb) => cb.value));
 }
 
-function setSpecialFilter(key) {
-  if (key === "jom" && specialFilter !== "jom" && jomUids.size === 0) {
+function toggleJom() {
+  if (!jomActive && jomUids.size === 0) {
     setStatus(`Keine JOM-Konfiguration für ${yearSelect.value} gefunden (jom-${yearSelect.value}.json fehlt).`, true);
     return;
   }
-  specialFilter = specialFilter === key ? null : key;
+  jomActive = !jomActive;
+  jomBtn.classList.toggle("active", jomActive);
+  jomBtn.textContent = jomActive ? "JOM-Filter aktiv ✕" : "Nur JOM-Läufe";
+  render();
+}
 
-  jomBtn.classList.toggle("active", specialFilter === "jom");
-  jomBtn.textContent = specialFilter === "jom" ? "JOM-Filter aktiv ✕" : "Nur JOM-Läufe";
-
-  nearbyBtn.classList.toggle("active", specialFilter === "nearby");
-  nearbyBtn.textContent = specialFilter === "nearby" ? "Nähe-Filter aktiv ✕" : "OL in der Nähe";
-
-  const disable = specialFilter !== null;
-  terrainFilters.concat(typeFilters).forEach((cb) => (cb.disabled = disable));
-  searchEl.disabled = disable;
+function toggleNearby() {
+  nearbyActive = !nearbyActive;
+  nearbyBtn.classList.toggle("active", nearbyActive);
+  nearbyBtn.textContent = nearbyActive ? "Nähe-Filter aktiv ✕" : "OL in der Nähe";
   render();
 }
 
@@ -159,19 +159,17 @@ function matchesSearch(ev, query) {
 }
 
 function render() {
-  let filtered;
-  if (specialFilter === "jom") {
-    filtered = events.filter(isJomEvent);
-  } else if (specialFilter === "nearby") {
-    filtered = events.filter(isNearbyEvent);
-  } else {
-    const terrains = activeTerrains();
-    const types = activeTypes();
-    const query = searchEl.value.trim().toLowerCase();
-    filtered = events.filter(
-      (ev) => terrains.has(ev.terrain) && types.has(categorize(ev.code)) && matchesSearch(ev, query)
-    );
-  }
+  const terrains = activeTerrains();
+  const types = activeTypes();
+  const query = searchEl.value.trim().toLowerCase();
+  const filtered = events.filter(
+    (ev) =>
+      terrains.has(ev.terrain) &&
+      types.has(categorize(ev.code)) &&
+      matchesSearch(ev, query) &&
+      (!jomActive || isJomEvent(ev)) &&
+      (!nearbyActive || isNearbyEvent(ev))
+  );
 
   bodyEl.innerHTML = "";
 
@@ -341,8 +339,8 @@ reloadBtn.addEventListener("click", loadFixtures);
 searchEl.addEventListener("input", render);
 terrainFilters.forEach((cb) => cb.addEventListener("change", render));
 typeFilters.forEach((cb) => cb.addEventListener("change", render));
-jomBtn.addEventListener("click", () => setSpecialFilter("jom"));
-nearbyBtn.addEventListener("click", () => setSpecialFilter("nearby"));
+jomBtn.addEventListener("click", toggleJom);
+nearbyBtn.addEventListener("click", toggleNearby);
 nearbyRadiusInput.addEventListener("input", () => {
-  if (specialFilter === "nearby") render();
+  if (nearbyActive) render();
 });
