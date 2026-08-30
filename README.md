@@ -22,3 +22,7 @@ Zum Beenden: `Ctrl+C` im Terminal.
 ## JOM-Filter
 
 Der Button "Nur JOM-Läufe" filtert anhand einer festen Liste von `unique_id`s in `jom-<jahr>.json` (z.B. `jom-2026.json`), da die JOM-Läufe nicht zuverlässig anhand von Region/Code erkennbar sind. Für ein neues Jahr diese Datei manuell anhand der aktuellen JOM-PDF von olvz.ch neu erstellen; ohne passende Datei ist der Button für das gewählte Jahr deaktiviert (Fehlermeldung im Status).
+
+## Koordinaten ohne Angabe
+
+Für Termine ohne Koordinaten von o-l.ch wird der Ortsname einmalig über den kostenlosen Schweizer Geodienst geo.admin.ch geschätzt (mit Region als Plausibilitätscheck gegen falsche Treffer). Ergebnisse landen in `geocode-cache.json` (nicht versioniert, wächst mit der Nutzung) und werden bei künftigen Ladevorgängen wiederverwendet. Solche geschätzten Positionen sind in der Karte als "≈" gekennzeichnet.

@@ -260,7 +260,7 @@ function buildRow(ev) {
   if (ev.lat != null && ev.lon != null) {
     const mapBtn = document.createElement("button");
     mapBtn.className = "small";
-    mapBtn.textContent = "Karte";
+    mapBtn.textContent = ev.coord_source === "approx" ? "Karte (≈Ort)" : "Karte";
     mapBtn.addEventListener("click", () => showOnMap(ev, tr));
     mapCell.appendChild(mapBtn);
   } else if (ev.location) {
@@ -289,7 +289,10 @@ function showOnMap(ev, row) {
   const label = encodeURIComponent(`${ev.name} (${ev.location})`);
   mapFrame.src = `https://www.google.com/maps?q=${ev.lat},${ev.lon}(${label})&z=14&output=embed`;
   mapTitle.textContent = `Karte: ${ev.name}`;
-  mapHint.textContent = `${ev.location}, ${ev.region} — Koordinaten aus o-l.ch, Position kann leicht abweichen.`;
+  mapHint.textContent =
+    ev.coord_source === "approx"
+      ? `${ev.location}, ${ev.region} — Position anhand des Ortsnamens geschätzt (o-l.ch liefert hier keine Koordinaten), kann deutlich abweichen.`
+      : `${ev.location}, ${ev.region} — Koordinaten aus o-l.ch, Position kann leicht abweichen.`;
 }
 
 function showOnMapByName(ev, row) {
