@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>OL-Termine</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <h1>OL-Termine</h1>
+  <div class="controls">
+    <label>Jahr:
+      <select id="year"></select>
+    </label>
+    <button id="reload">⟳ Daten laden</button>
+    <span id="status"></span>
+  </div>
+  <div class="filters">
+    <label><input type="checkbox" class="terrain-filter" value="wald" checked> 🌲 Wald</label>
+    <label><input type="checkbox" class="terrain-filter" value="stadt" checked> 🏠 Stadt</label>
+    <label><input type="checkbox" class="terrain-filter" value="mix" checked> 🏡 Mix</label>
+    <label><input type="checkbox" class="terrain-filter" value="unbekannt" checked> ⋯ ohne Angabe</label>
+    <input type="search" id="search" placeholder="Suche nach Name, Veranstalter, Ort...">
+  </div>
+</header>
+
+<main>
+  <section id="list-panel">
+    <table id="events-table">
+      <thead>
+        <tr>
+          <th>Datum</th>
+          <th>Region</th>
+          <th>Name</th>
+          <th>Veranstalter</th>
+          <th>Gebiet</th>
+          <th>D</th>
+          <th>T</th>
+          <th>Karte</th>
+          <th>ICS</th>
+        </tr>
+      </thead>
+      <tbody id="events-body">
+        <tr><td colspan="9" class="empty">Noch keine Daten geladen. "Daten laden" klicken.</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <section id="map-panel">
+    <h2 id="map-title">Karte</h2>
+    <iframe id="map-frame" title="OL-Gebiet Karte" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    <p id="map-hint">Auf "Karte" bei einem Termin klicken, um das Gebiet hier anzuzeigen.</p>
+  </section>
+</main>
+
+<script src="app.js"></script>
+</body>
+</html>
