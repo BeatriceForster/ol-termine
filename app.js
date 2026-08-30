@@ -134,6 +134,12 @@ function buildRow(ev) {
     mapBtn.textContent = "Karte";
     mapBtn.addEventListener("click", () => showOnMap(ev, tr));
     mapCell.appendChild(mapBtn);
+  } else if (ev.location) {
+    const mapBtn = document.createElement("button");
+    mapBtn.className = "small";
+    mapBtn.textContent = "Karte (Ort)";
+    mapBtn.addEventListener("click", () => showOnMapByName(ev, tr));
+    mapCell.appendChild(mapBtn);
   }
   tr.appendChild(mapCell);
 
@@ -155,6 +161,14 @@ function showOnMap(ev, row) {
   mapFrame.src = `https://www.google.com/maps?q=${ev.lat},${ev.lon}(${label})&z=14&output=embed`;
   mapTitle.textContent = `Karte: ${ev.name}`;
   mapHint.textContent = `${ev.location}, ${ev.region} — Koordinaten aus o-l.ch, Position kann leicht abweichen.`;
+}
+
+function showOnMapByName(ev, row) {
+  document.querySelectorAll("#events-body tr.highlight").forEach((r) => r.classList.remove("highlight"));
+  row.classList.add("highlight");
+  mapFrame.src = `https://www.google.com/maps?q=${encodeURIComponent(ev.location)}&z=13&output=embed`;
+  mapTitle.textContent = `Karte: ${ev.name}`;
+  mapHint.textContent = `Suche nach "${ev.location}" — o-l.ch liefert für diesen Termin keine genauen Koordinaten.`;
 }
 
 function icsEscape(text) {
