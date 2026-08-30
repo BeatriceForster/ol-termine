@@ -54,7 +54,15 @@ function isNearbyEvent(ev) {
 let events = [];
 let jomActive = false;
 let nearbyActive = false;
+let showPast = false;
 let jomUids = new Set();
+
+function todayIso() {
+  const d = new Date();
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  return `${d.getFullYear()}-${mm}-${dd}`;
+}
 
 async function loadJomConfig(year) {
   try {
@@ -83,6 +91,7 @@ const typeFilters = Array.from(document.querySelectorAll(".type-filter"));
 const jomBtn = document.getElementById("jom-btn");
 const nearbyBtn = document.getElementById("nearby-btn");
 const nearbyRadiusInput = document.getElementById("nearby-radius");
+const pastBtn = document.getElementById("past-btn");
 
 function initYearSelect() {
   const current = new Date().getFullYear();
@@ -147,6 +156,13 @@ function toggleNearby() {
   render();
 }
 
+function togglePast() {
+  showPast = !showPast;
+  pastBtn.classList.toggle("active", showPast);
+  pastBtn.textContent = showPast ? "Vergangene Termine ausblenden" : "Mit vergangenen Terminen";
+  render();
+}
+
 function formatDate(iso) {
   const [y, m, d] = iso.split("-");
   return `${d}.${m}.${y}`;
@@ -162,13 +178,15 @@ function render() {
   const terrains = activeTerrains();
   const types = activeTypes();
   const query = searchEl.value.trim().toLowerCase();
+  const today = todayIso();
   const filtered = events.filter(
     (ev) =>
       terrains.has(ev.terrain) &&
       types.has(categorize(ev.code)) &&
       matchesSearch(ev, query) &&
       (!jomActive || isJomEvent(ev)) &&
-      (!nearbyActive || isNearbyEvent(ev))
+      (!nearbyActive || isNearbyEvent(ev)) &&
+      (showPast || ev.date >= today)
   );
 
   bodyEl.innerHTML = "";
@@ -290,17 +308,15 @@ function icsEscape(text) {
     .replace(/\n/g, "\\n");
 }
 
-function isoDateToIcsDate(iso, offsetDays = 0) {
-  const d = new Date(`${iso}T00:00:00Z`);
-  d.setUTCDate(d.getUTCDate() + offsetDays);
-  return d.toISOString().slice(0, 10).replace(/-/g, "");
+function isoDateToIcsDateTime(iso, time) {
+  return `${iso.replace(/-/g, "")}T${time}00`;
 }
 
 function buildIcs(ev) {
   const now = new Date().toISOString().replace(/[-:]/g, "").split(".")[0] + "Z";
-  const start = isoDateToIcsDate(ev.date);
-  const end = isoDateToIcsDate(ev.date, 1);
-  const description = `Veranstalter: ${ev.organizer}${ev.distance ? " | Distanz: " + ev.distance : ""} | Details: ${ev.detail_url}`;
+  const start = isoDateToIcsDateTime(ev.date, "0900");
+  const end = isoDateToIcsDateTime(ev.date, "1400");
+  const description = `Veranstalter: ${ev.organizer}${ev.distance ? " | Distanz: " + ev.distance : ""} | Details: ${ev.detail_url} | Zeit 9-14 Uhr ist ein Platzhalter, o-l.ch liefert keine genaue Startzeit.`;
   return [
     "BEGIN:VCALENDAR",
     "VERSION:2.0",
@@ -309,8 +325,8 @@ function buildIcs(ev) {
     "BEGIN:VEVENT",
     `UID:ol-${ev.uid}@o-l.ch`,
     `DTSTAMP:${now}`,
-    `DTSTART;VALUE=DATE:${start}`,
-    `DTEND;VALUE=DATE:${end}`,
+    `DTSTART;TZID=Europe/Zurich:${start}`,
+    `DTEND;TZID=Europe/Zurich:${end}`,
     `SUMMARY:${icsEscape(ev.name)}`,
     `LOCATION:${icsEscape(ev.location + ", " + ev.region)}`,
     `DESCRIPTION:${icsEscape(description)}`,
@@ -341,6 +357,7 @@ terrainFilters.forEach((cb) => cb.addEventListener("change", render));
 typeFilters.forEach((cb) => cb.addEventListener("change", render));
 jomBtn.addEventListener("click", toggleJom);
 nearbyBtn.addEventListener("click", toggleNearby);
+pastBtn.addEventListener("click", togglePast);
 nearbyRadiusInput.addEventListener("input", () => {
   if (nearbyActive) render();
 });
