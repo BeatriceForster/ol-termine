@@ -66,7 +66,7 @@ function todayIso() {
 
 async function loadJomConfig(year) {
   try {
-    const res = await fetch(`/jom-${year}.json`, { cache: "no-store" });
+    const res = await fetch(`jom-${year}.json`, { cache: "no-store" });
     if (!res.ok) {
       jomUids = new Set();
       return;
@@ -109,19 +109,33 @@ function setStatus(text, isError) {
   statusEl.classList.toggle("error", !!isError);
 }
 
+async function fetchFixturesData(year) {
+  // Lokaler Dev-Server (server.py): live von o-l.ch.
+  try {
+    const liveRes = await fetch(`api/fixtures?year=${encodeURIComponent(year)}`);
+    if (liveRes.ok) return liveRes;
+  } catch {
+    // kein lokaler Server (z.B. GitHub Pages) -> Fallback unten
+  }
+  // Statischer Host (GitHub Pages): vorgenerierte Daten aus data/.
+  return fetch(`data/fixtures-${encodeURIComponent(year)}.json?t=${Date.now()}`);
+}
+
 async function loadFixtures() {
   const year = yearSelect.value;
   reloadBtn.disabled = true;
-  setStatus(`Lade Termine ${year} von o-l.ch ...`);
+  setStatus(`Lade Termine ${year} ...`);
   try {
-    const [res] = await Promise.all([
-      fetch(`/api/fixtures?year=${encodeURIComponent(year)}`),
-      loadJomConfig(year),
-    ]);
+    const [res] = await Promise.all([fetchFixturesData(year), loadJomConfig(year)]);
     const data = await res.json();
     if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
     events = data.events;
-    setStatus(`${data.count} Termine geladen (${new Date().toLocaleTimeString("de-CH")}).`);
+    if (data.generated_at) {
+      const stamp = new Date(data.generated_at).toLocaleString("de-CH");
+      setStatus(`${data.count} Termine (Stand ${stamp}, via GitHub Actions).`);
+    } else {
+      setStatus(`${data.count} Termine geladen (${new Date().toLocaleTimeString("de-CH")}).`);
+    }
     render();
   } catch (err) {
     setStatus(`Fehler: ${err.message}`, true);
