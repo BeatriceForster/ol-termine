@@ -1,7 +1,7 @@
 {
   "year": "2027",
   "count": 118,
-  "generated_at": "2026-11-03T21:06:17+00:00",
+  "generated_at": "2026-11-04T11:40:30+00:00",
   "events": [
     {
       "uid": "13685",
@@ -1486,9 +1486,9 @@
       "location": "Isikerberg",
       "distance": "M",
       "terrain": "wald",
-      "lat": 47.38189697265625,
-      "lon": 8.818214416503906,
-      "coord_source": "approx",
+      "lat": 47.364617377023116,
+      "lon": 8.825054172437694,
+      "coord_source": "exact",
       "detail_url": "https://o-l.ch/cgi-bin/fixtures?mode=show&unique_id=13698"
     },
     {
