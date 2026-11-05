@@ -1,7 +1,7 @@
 {
   "year": "2027",
   "count": 118,
-  "generated_at": "2026-11-04T11:40:30+00:00",
+  "generated_at": "2026-11-05T11:41:26+00:00",
   "events": [
     {
       "uid": "13685",
@@ -1722,7 +1722,7 @@
       "region": "BE/SO",
       "code": "NOM",
       "name": "Schweizer Nacht-OL Meisterschaft",
-      "organizer": "OL Regio Olten / Bucheggberger Grünhholz",
+      "organizer": "OL Regio Olten / Bucheggberger Grünholz",
       "location": "L 🌲",
       "distance": "",
       "terrain": "unbekannt",
@@ -1740,7 +1740,7 @@
       "name": "Zurzacher OL",
       "organizer": "Cordoba OLC",
       "location": "noch offen",
-      "distance": "S",
+      "distance": "L",
       "terrain": "wald",
       "lat": null,
       "lon": null,
